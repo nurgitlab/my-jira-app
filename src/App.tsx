@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import "./App.css"
 
 
@@ -15,7 +15,7 @@ interface itemInterface {
 
 
 export const App = () => {
-    const [boards, setBoards] = useState<boardInterface[]>([
+    const [boards, setBoards] = React.useState<boardInterface[]>([
         {
             id: 1,
             title: "toDo",
@@ -51,12 +51,16 @@ export const App = () => {
         }
     ])
 
+    const [currentBoard, setCurrentBoard] = React.useState<boardInterface | null>(null)
+    const [currentItem, setCurrentItem] = React.useState<itemInterface | null | any>(null)
+
     function dragStartHandler(
         e: any,
         board: boardInterface,
         boardsItem: itemInterface,
     ) {
-        console.log(e)
+        setCurrentBoard(board)
+        setCurrentItem(boardsItem)
     }
 
     function dragEndHandler(
@@ -67,8 +71,6 @@ export const App = () => {
 
     function dragOverHandler(
         e: any,
-        board: boardInterface,
-        boardsItem: itemInterface,
     ) {
         e.preventDefault()
         if (e.target.className === "card") {
@@ -82,6 +84,22 @@ export const App = () => {
         boardsItem: itemInterface,
     ) {
         e.preventDefault()
+        const currentIndex: number | any = currentBoard?.items.indexOf(currentItem)
+        currentBoard?.items.splice(currentIndex, 1)
+
+        const dropIndex = board.items.indexOf(boardsItem)
+        board.items.splice(dropIndex + 1, 0, currentItem)
+
+        setBoards(boards.map(b => {
+            if (b.id === board.id) {
+                return board
+            }
+            if (b.id === currentBoard?.id) {
+                return currentBoard
+            }
+            return b
+        }))
+
         e.target.style.boxShadow = "none"
     }
 
@@ -113,7 +131,7 @@ export const App = () => {
                                         onDragStart={(e) => dragStartHandler(e, board, boardsItem)}
                                         onDragLeave={(e) => dragLeaveHandler(e)}
                                         onDragEnd={(e) => dragEndHandler(e)}
-                                        onDragOver={(e) => dragOverHandler(e, board, boardsItem)}
+                                        onDragOver={(e) => dragOverHandler(e)}
                                         onDrop={(e) => dropHandler(e, board, boardsItem)}
                                     >
                                         {boardsItem.title}
