@@ -1,4 +1,6 @@
 import React from 'react';
+
+
 import "./App.css"
 
 
@@ -12,7 +14,6 @@ interface itemInterface {
     id: number,
     title: string,
 }
-
 
 export const App = () => {
     const [boards, setBoards] = React.useState<boardInterface[]>([
@@ -63,15 +64,11 @@ export const App = () => {
         setCurrentItem(boardsItem)
     }
 
-    function dragEndHandler(
-        e: any,
-    ) {
+    function dragEndHandler(e: any) {
         e.target.style.boxShadow = "none"
     }
 
-    function dragOverHandler(
-        e: any,
-    ) {
+    function dragOverHandler(e: any) {
         e.preventDefault()
         if (e.target.className === "card") {
             e.target.style.boxShadow = "0px 4px 3px blue"
@@ -107,6 +104,26 @@ export const App = () => {
         e.target.style.boxShadow = "none"
     }
 
+    function dropBoardHandler(e: any, board: boardInterface) {
+        if (board.items.length === 0) {
+            board.items.push(currentItem)
+            const currentIndex: number | any = currentBoard?.items.indexOf(currentItem)
+            currentBoard?.items.splice(currentIndex, 1)
+
+            setBoards(boards.map(b => {
+                if (b.id === board.id) {
+                    return board
+                }
+                if (b.id === currentBoard?.id) {
+                    return currentBoard
+                }
+                return b
+            }))
+
+            e.target.style.boxShadow = "none"
+        }
+    }
+
     return (
         <div className={"main-block"}>
             <div className={"title"}>
@@ -118,6 +135,8 @@ export const App = () => {
                         <div
                             key={board.id}
                             className={"board"}
+                            onDragOver={(e) => dragOverHandler(e)}
+                            onDrop={(e) => dropBoardHandler(e, board)}
                         >
                             <div className={"title"}>
                                 {board.title}
